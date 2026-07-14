@@ -164,8 +164,62 @@ git tag -l "v*"                                          # list only version tag
 
 #### Delete a tag (if you made a mistake)
 ```bash
-git tag -d v0.10.0                                       # delete local tag
-git push origin --delete v0.10.0                         # delete remote tag
+git tag -d v0.11.0                                       # delete local tag (-d or --delete)
+git push origin --delete v0.11.0                         # delete remote tag on GitHub
+git push gitea --delete v0.11.0                          # delete remote tag on Gitea
+```
+
+**Full workflow to fix a wrong tag:**
+```bash
+# 1. delete local tag
+git tag -d v0.11.0
+
+# 2. delete from remotes
+git push origin --delete v0.11.0
+git push gitea --delete v0.11.0
+
+# 3. recreate with correct message
+git tag -a v0.11.0 -m "v0.11.0 — correct message here"
+
+# 4. push again
+git push origin v0.11.0
+git push gitea v0.11.0
+```
+
+#### Editor for tag messages — VSCode vs vim
+
+When you run `git tag -a v0.11.0` **without** `-m`, Git opens your default editor:
+
+**If VSCode opens (TAG_EDITMSG tab):**
+```
+1. Type your message in the editor
+2. Ctrl+S    ← save the file
+3. Ctrl+W    ← close the tab
+# Git creates the tag automatically after the tab is closed
+```
+
+**If vim opens:**
+```
+i            ← enter insert mode
+# type your message
+Esc          ← exit insert mode
+:wq          ← save and quit
+Enter        ← confirm
+```
+
+**To abort without creating the tag:**
+```
+# In VSCode — delete all content then Ctrl+S + Ctrl+W
+# In vim
+Esc
+:q!          ← quit without saving → tag is NOT created
+Enter
+```
+
+**Best practice — always use `-m` to avoid the editor:**
+```bash
+git tag -a v0.11.0 -m "v0.11.0 — bar, barh, set_xticks, Text kwargs"
+# ← no editor opens, tag created immediately
 ```
 
 #### What happens with multiple tags
