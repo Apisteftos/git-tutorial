@@ -131,7 +131,7 @@ Releases → Draft a new release → choose tag → add release notes → Publis
 
 ## What Goes in Each Release
 
-A good release on GitHub should include:
+A good release on GitHub should include all of these sections when relevant:
 
 ```markdown
 ## What's New in v0.2.0
@@ -141,16 +141,63 @@ A good release on GitHub should include:
 - legend() free function
 - boxplot() method in Axes class
 
+### Changed
+- subplots() now accepts const std::vector<long>&
+
+### Deprecated
+- Figure::clf() — will be removed in v1.0.0, use plt.clf() instead
+- Axes::plot(x, y, fmt) — use Axes::plot(PlotConfig) instead
+
+### Removed
+- Nothing removed in this release
+
 ### Fixed
 - Memory leak in toNumpy() for large vectors
 - segfault when subplots() called with squeeze=True
 
-### Changed
-- subplots() now accepts const std::vector<long>&
-
-### Removed
-- Nothing removed in this release
+### Security
+- Fixed potential buffer overflow in toNumpy() when size=0
 ```
+
+---
+
+## Changelog Sections Explained
+
+| Section | When to use |
+|---------|-------------|
+| `### Added` | New features, methods, classes, structs |
+| `### Changed` | Changes to existing features that are backwards compatible |
+| `### Deprecated` | Features that still work but will be removed in a future version |
+| `### Removed` | Features removed in this version |
+| `### Fixed` | Bug fixes |
+| `### Security` | Security vulnerability fixes |
+
+### Deprecated — features that will be removed soon
+
+Use `### Deprecated` when you want to warn users that something will be removed, but haven't removed it yet:
+
+```markdown
+### Deprecated
+- `Axes::plot(x, y, fmt)` — use `Axes::plot(PlotConfig)` instead, will be removed in v1.0.0
+- `Figure::clf()` — use `plt.clf()` instead, will be removed in v1.0.0
+```
+
+This gives users time to update their code before you remove the feature.
+
+### Security — vulnerability fixes
+
+Use `### Security` when you fix a security vulnerability:
+
+```markdown
+### Security
+- Fixed buffer overflow in toNumpy() when input vector is empty
+- Fixed potential null pointer dereference in Interpreter::getInstance()
+```
+
+For a plotting library like matplotlib-modern-cpp, security fixes are rare but could include:
+- Buffer overflows in numpy array creation
+- Memory corruption bugs in PyPtr
+- Null pointer dereferences in Python C API calls
 
 ---
 
@@ -181,5 +228,7 @@ A good release on GitHub should include:
 | New class | added Animation class | MINOR |
 | API change | renamed Axes::plot() | MAJOR |
 | Removed feature | removed Figure::clf() | MAJOR |
+| Deprecated feature | marked clf() as deprecated | MINOR |
+| Security fix | fixed buffer overflow | PATCH |
 | Documentation only | updated README | no bump needed |
 | Internal refactor | no API change | PATCH |
