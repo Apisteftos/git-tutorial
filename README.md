@@ -292,6 +292,18 @@ git push gitea main                                      # Push to Gitea
 git push origin main && git push gitea main              # Push to both at once
 ```
 
+#### Remove a Remote
+
+```bash
+git remote -v                                            # 1. list remotes, find the name to remove
+git remote remove gitea                                   # 2. remove it (or: git remote rm gitea)
+git remote -v                                            # 3. verify it's gone
+```
+
+`gitea` here is just the remote's **name** — not a fixed keyword — so use whatever you actually called it when you ran `git remote add <name> <url>` (check with `git remote -v` first if you're not sure).
+
+This only removes the local reference to that remote — it does **not** delete anything from GitHub/GitLab/Gitea itself, and any other remotes (e.g. `origin`) are untouched.
+
 ### Remove Sensitive Information from Commit History
 
 ```bash
