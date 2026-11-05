@@ -707,4 +707,6 @@ How to number releases (Semantic Versioning), what goes into a release and how t
 
 ## License
 
+Copyright © 2024–2026 **Konstantinos Angeloulis**
+
 This project is licensed under the [MIT License](LICENSE).
