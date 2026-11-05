@@ -25,14 +25,14 @@ MAJOR.MINOR.PATCH
 
 ### PATCH — increment when you fix a bug
 ```
-0.1.0  →  0.1.1   fixed segfault in subplots()
-0.1.1  →  0.1.2   fixed memory leak in Axes::plot()
+0.1.0  →  0.1.1   fixed crash in parse()
+0.1.1  →  0.1.2   fixed memory leak in Widget::render()
 ```
 
 ### MINOR — increment when you add a new feature
 ```
-0.1.0  →  0.2.0   added hist() to Axes class
-0.2.0  →  0.3.0   added legend() free function
+0.1.0  →  0.2.0   added resize() to Widget class
+0.2.0  →  0.3.0   added makeWidget() free function
 ```
 When you increment MINOR, reset PATCH to 0:
 ```
@@ -42,7 +42,7 @@ When you increment MINOR, reset PATCH to 0:
 ### MAJOR — increment when you break the API
 ```
 0.x.x  →  1.0.0   stable release, API locked
-1.0.0  →  2.0.0   subplots() signature changed
+1.0.0  →  2.0.0   parse() signature changed
 ```
 When you increment MAJOR, reset MINOR and PATCH to 0:
 ```
@@ -71,19 +71,19 @@ Once the API is stable and the project is production ready:
 
 ```
 0.1.0   first working version
-        Axes, Figure, PyPtr, Interpreter, basic free functions
+        Widget, Window, Buffer, basic free functions
 
 0.1.1   bug fix
-        fixed subplots() segfault with numpy array
+        fixed parse() crash with empty input
 
 0.2.0   new features
-        added hist(), boxplot(), legend() to Axes
+        added resize(), rotate(), hide() to Widget
 
 0.2.1   bug fix
-        fixed memory leak in toNumpy()
+        fixed memory leak in Buffer::copy()
 
 0.3.0   new features
-        added 3D plotting support
+        added 3D rendering support
 
 1.0.0   stable release
         API locked, production ready
@@ -92,7 +92,7 @@ Once the API is stable and the project is production ready:
         added animation support
 
 2.0.0   breaking change
-        subplots() now returns SubplotsResult instead of std::pair
+        parse() now returns ParseResult instead of std::pair
 ```
 
 ---
@@ -113,7 +113,7 @@ For testing before an official release:
 
 ```bash
 # tag locally
-git tag -a v0.1.0 -m "First release — Axes, Figure, basic free functions"
+git tag -a v0.1.0 -m "First release — Widget, Window, basic free functions"
 
 # push tag to GitHub
 git push origin v0.1.0
@@ -137,26 +137,26 @@ A good release on GitHub should include all of these sections when relevant:
 ## What's New in v0.2.0
 
 ### Added
-- hist() method in Axes class
-- legend() free function
-- boxplot() method in Axes class
+- resize() method in Widget class
+- makeWidget() free function
+- rotate() method in Widget class
 
 ### Changed
-- subplots() now accepts const std::vector<long>&
+- parse() now accepts const std::vector<long>&
 
 ### Deprecated
-- Figure::clf() — will be removed in v1.0.0, use plt.clf() instead
-- Axes::plot(x, y, fmt) — use Axes::plot(PlotConfig) instead
+- Window::clear() — will be removed in v1.0.0, use Window::reset() instead
+- Widget::draw(x, y, flags) — use Widget::draw(DrawConfig) instead
 
 ### Removed
 - Nothing removed in this release
 
 ### Fixed
-- Memory leak in toNumpy() for large vectors
-- segfault when subplots() called with squeeze=True
+- Memory leak in Buffer::copy() for large inputs
+- crash when parse() is called with an empty string
 
 ### Security
-- Fixed potential buffer overflow in toNumpy() when size=0
+- Fixed potential buffer overflow in Buffer::copy() when size=0
 ```
 
 ---
@@ -178,8 +178,8 @@ Use `### Deprecated` when you want to warn users that something will be removed,
 
 ```markdown
 ### Deprecated
-- `Axes::plot(x, y, fmt)` — use `Axes::plot(PlotConfig)` instead, will be removed in v1.0.0
-- `Figure::clf()` — use `plt.clf()` instead, will be removed in v1.0.0
+- `Widget::draw(x, y, flags)` — use `Widget::draw(DrawConfig)` instead, will be removed in v1.0.0
+- `Window::clear()` — use `Window::reset()` instead, will be removed in v1.0.0
 ```
 
 This gives users time to update their code before you remove the feature.
@@ -190,14 +190,14 @@ Use `### Security` when you fix a security vulnerability:
 
 ```markdown
 ### Security
-- Fixed buffer overflow in toNumpy() when input vector is empty
-- Fixed potential null pointer dereference in Interpreter::getInstance()
+- Fixed buffer overflow in Buffer::copy() when input is empty
+- Fixed potential null pointer dereference in Logger::getInstance()
 ```
 
-For a plotting library like matplotlib-modern-cpp, security fixes are rare but could include:
-- Buffer overflows in numpy array creation
-- Memory corruption bugs in PyPtr
-- Null pointer dereferences in Python C API calls
+For a small C++ library, security fixes are rare but could include:
+- Buffer overflows when copying data
+- Memory corruption bugs in custom smart pointers
+- Null pointer dereferences in calls into C APIs
 
 ---
 
@@ -211,10 +211,10 @@ For a plotting library like matplotlib-modern-cpp, security fixes are rare but c
 1.0.0  →  0.9.0
 
 # wrong — adding features in a PATCH
-0.1.0  →  0.1.1   but added new Axes methods (should be 0.2.0)
+0.1.0  →  0.1.1   but added new Widget methods (should be 0.2.0)
 
 # wrong — breaking API in a MINOR
-0.1.0  →  0.2.0   but changed subplots() signature (should be 1.0.0 or wait)
+0.1.0  →  0.2.0   but changed parse() signature (should be 1.0.0 or wait)
 ```
 
 ---
@@ -223,12 +223,12 @@ For a plotting library like matplotlib-modern-cpp, security fixes are rare but c
 
 | Change type | Example | Version bump |
 |-------------|---------|--------------|
-| Bug fix | fixed segfault | PATCH |
-| New method | added hist() | MINOR |
+| Bug fix | fixed crash | PATCH |
+| New method | added resize() | MINOR |
 | New class | added Animation class | MINOR |
-| API change | renamed Axes::plot() | MAJOR |
-| Removed feature | removed Figure::clf() | MAJOR |
-| Deprecated feature | marked clf() as deprecated | MINOR |
+| API change | renamed Widget::draw() | MAJOR |
+| Removed feature | removed Window::clear() | MAJOR |
+| Deprecated feature | marked clear() as deprecated | MINOR |
 | Security fix | fixed buffer overflow | PATCH |
 | Documentation only | updated README | no bump needed |
 | Internal refactor | no API change | PATCH |

@@ -1,4 +1,4 @@
-## Git tutorial
+# Git Tutorial
 
 > Git is a distributed version control system that tracks changes in source code
 > during software development. It allows multiple developers to work together,
@@ -9,8 +9,8 @@
 
 ### Initial Setup
 ```bash
-git config --global user.email "kosagglis@gmail.com"    # Connect with Git email
-git config --global user.name "Apisteftos"              # Connect with Git username
+git config --global user.email "you@example.com"    # Connect with Git email
+git config --global user.name "your-username"              # Connect with Git username
 ```
 
 ### Initialize Repository
@@ -19,16 +19,16 @@ git init                                                 # Initialize in root di
 git add file/dir                                         # Add file or directory
 git commit -m "first commit"                            # Commit changes
 git branch -M master                                     # Name the branch (master/main)
-git remote add origin https://github.com/Apisteftos/Dijkstra.git
+git remote add origin https://github.com/<username>/<repo>.git
 # Or use SSH:
-git remote add origin git@github.com:Apisteftos/Dijkstra.git
+git remote add origin git@github.com:<username>/<repo>.git
 git push -u origin master                                # Push to remote (-u sets upstream)
 ```
 
 ### If HTTPS Doesn't Work
 ```bash
 git remote -v                                            # Check current remote
-git remote set-url origin git@github.com:Apisteftos/Dijkstra.git  # Change to SSH
+git remote set-url origin git@github.com:<username>/<repo>.git  # Change to SSH
 git remote -v                                            # Verify change
 git push -u origin master
 ```
@@ -53,14 +53,14 @@ git add -A     # stages changes in the ENTIRE repo including /include/, /tests/ 
 **Always use `git add -A`** when working from the repo root — it stages everything.
 
 ```bash
-git add include/dijkstra.cpp                             # Add specific files/directories
+git add src/main.cpp                             # Add specific files/directories
 git add .                                                # Add all in current directory
 git add -A                                               # Add ALL changes in entire repo
 git commit                                               # Opens editor for commit message
 # In nano: Ctrl+O to save, Enter, Ctrl+X to exit
 
 # Or commit directly:
-git commit -m "adding the dijkstra.cpp file"
+git commit -m "add main.cpp"
 git commit -a                                            # Commit all changes
 git push origin master
 git status                                               # See uncommitted or changed files
@@ -145,15 +145,15 @@ Tags mark specific commits as version releases.
 
 #### Create a tag
 ```bash
-git tag v0.10.0                                          # lightweight tag
-git tag -a v0.10.0 -m "Release v0.10.0"                 # annotated tag (recommended)
+git tag v0.5.0                                          # lightweight tag
+git tag -a v0.5.0 -m "Release v0.5.0"                 # annotated tag (recommended)
 ```
 
 #### Push a tag
 ```bash
-git push origin v0.10.0                                  # push specific tag
+git push origin v0.5.0                                  # push specific tag
 git push origin --tags                                   # push ALL local tags at once
-git push gitea v0.10.0                                   # push to Gitea as well
+git push backup v0.5.0                                   # push to the second remote as well
 ```
 
 #### List tags
@@ -164,31 +164,31 @@ git tag -l "v*"                                          # list only version tag
 
 #### Delete a tag (if you made a mistake)
 ```bash
-git tag -d v0.11.0                                       # delete local tag (-d or --delete)
-git push origin --delete v0.11.0                         # delete remote tag on GitHub
-git push gitea --delete v0.11.0                          # delete remote tag on Gitea
+git tag -d v0.6.0                                       # delete local tag (-d or --delete)
+git push origin --delete v0.6.0                         # delete remote tag on GitHub
+git push backup --delete v0.6.0                          # delete remote tag on the second remote
 ```
 
 **Full workflow to fix a wrong tag:**
 ```bash
 # 1. delete local tag
-git tag -d v0.11.0
+git tag -d v0.6.0
 
 # 2. delete from remotes
-git push origin --delete v0.11.0
-git push gitea --delete v0.11.0
+git push origin --delete v0.6.0
+git push backup --delete v0.6.0
 
 # 3. recreate with correct message
-git tag -a v0.11.0 -m "v0.11.0 — correct message here"
+git tag -a v0.6.0 -m "v0.6.0 — correct message here"
 
 # 4. push again
-git push origin v0.11.0
-git push gitea v0.11.0
+git push origin v0.6.0
+git push backup v0.6.0
 ```
 
 #### Editor for tag messages — VSCode vs vim
 
-When you run `git tag -a v0.11.0` **without** `-m`, Git opens your default editor:
+When you run `git tag -a v0.6.0` **without** `-m`, Git opens your default editor:
 
 **If VSCode opens (TAG_EDITMSG tab):**
 ```
@@ -218,23 +218,22 @@ Enter
 
 **Best practice — always use `-m` to avoid the editor:**
 ```bash
-git tag -a v0.11.0 -m "v0.11.0 — bar, barh, set_xticks, Text kwargs"
+git tag -a v0.6.0 -m "v0.6.0 — add feature X, fix Y"
 # ← no editor opens, tag created immediately
 ```
 
 #### What happens with multiple tags
 ```
 v0.1.0  → first working version
-v0.6.0  → detail.h, AxesGrid, step
-v0.7.0  → fill, fill_between, Vec operators
-v0.8.0  → errorbar
-v0.9.0  → scatter
-v0.10.0 → fill_between full kwargs, unit tests, CI ← latest
+v0.2.0  → new feature A
+v0.3.0  → new feature B
+v0.4.0  → new feature C
+v0.5.0  → unit tests, CI ← latest
 ```
 
 Each tag points to a specific commit. The dynamic README badge:
 ```markdown
-![Version](https://img.shields.io/github/v/tag/Apisteftos/matplotlib-modern-cpp?label=version&color=blue)
+![Version](https://img.shields.io/github/v/tag/<username>/<repo>?label=version&color=blue)
 ```
 automatically shows the **latest tag** — no manual README update needed.
 
@@ -282,27 +281,84 @@ git reset --hard HEAD~1                                  # Undo last commit, dis
 git restore file.cpp                                     # Discard changes in a file (cannot undo!)
 ```
 
+### Dismiss (Discard) Changes
+
+Use this when you want to throw away local changes. Check first what would be lost:
+
+```bash
+git status                                               # modified (tracked) and untracked files
+git diff --stat                                          # how many lines changed per file
+```
+
+#### Tracked files (modified or deleted)
+
+```bash
+git restore path/to/file                                 # discard changes in one file (cannot undo!)
+git restore path/to/dir                                  # discard changes in a whole folder
+git restore .                                            # discard ALL changes in the current directory
+git restore $(git diff --name-only | grep -i 'readme.md$')   # discard only changes in files matching a pattern
+```
+
+`git restore` resets the files to the last commit. Uncommitted edits are gone for good.
+
+#### Untracked files (new files never committed)
+
+`git restore` does **not** touch untracked files. Use `git clean`, and always do a dry run first:
+
+```bash
+git clean -nd path/to/dir                                # dry run: only LISTS what would be deleted
+git clean -fd path/to/dir                                # delete untracked files and folders (cannot undo!)
+git clean -fdx                                           # also delete ignored files (build output etc.)
+```
+
+A plain `git clean` skips files that match `.gitignore`; `-x` includes them.
+
+#### Everything at once
+
+```bash
+git restore .                                            # all tracked changes
+git clean -fd                                            # all untracked files and folders
+```
+
+#### Not sure? Stash instead
+
+```bash
+git stash -u                                             # save tracked AND untracked changes to the side
+git stash list                                           # see what was saved
+git stash pop                                            # bring the changes back (and remove the stash)
+git stash drop                                           # or throw the stash away for good
+```
+
+| Goal | Command |
+|---|---|
+| Discard changes in one file | `git restore file` |
+| Discard all tracked changes | `git restore .` |
+| Delete untracked files | `git clean -fd` (preview with `-nd`) |
+| Undo `git add` but keep the edits | `git restore --staged file` |
+| Undo the last commit, keep the edits | `git reset --soft HEAD~1` |
+| Keep changes for later | `git stash -u` |
+
 ### Multiple Remotes
 
 ```bash
 git remote -v                                            # See all remotes
-git remote add gitea http://your-nas/repo.git            # Add second remote
+git remote add backup http://your-server/repo.git         # Add second remote
 git push origin main                                     # Push to GitHub
-git push gitea main                                      # Push to Gitea
-git push origin main && git push gitea main              # Push to both at once
+git push backup main                                      # Push to the second remote
+git push origin main && git push backup main              # Push to both at once
 ```
 
 #### Remove a Remote
 
 ```bash
 git remote -v                                            # 1. list remotes, find the name to remove
-git remote remove gitea                                   # 2. remove it (or: git remote rm gitea)
+git remote remove backup                                 # 2. remove it (or: git remote rm backup)
 git remote -v                                            # 3. verify it's gone
 ```
 
-`gitea` here is just the remote's **name** — not a fixed keyword — so use whatever you actually called it when you ran `git remote add <name> <url>` (check with `git remote -v` first if you're not sure).
+`backup` here is just the remote's **name** — not a fixed keyword — so use whatever you actually called it when you ran `git remote add <name> <url>` (check with `git remote -v` first if you're not sure).
 
-This only removes the local reference to that remote — it does **not** delete anything from GitHub/GitLab/Gitea itself, and any other remotes (e.g. `origin`) are untouched.
+This only removes the local reference to that remote — it does **not** delete anything from GitHub, GitLab or your own server itself, and any other remotes (e.g. `origin`) are untouched.
 
 ### Remove Sensitive Information from Commit History
 
@@ -352,20 +408,19 @@ git diff --staged
 # press q to exit
 
 # 5. commit
-git commit -m "feat: add histogram and legend support
+git commit -m "feat: add export support
 
-- Add HistConfig struct
-- Add LegendConfig struct
-- Add histImpl(), legendImpl() in Detail.h"
+- Add ExportConfig struct
+- Add exportImpl() in detail.h"
 
 # 6. push to remotes
 git push origin main
-git push gitea main
+git push backup main
 
 # 7. if this is a version release — tag it
-git tag -a v0.11.0 -m "Release v0.11.0"
-git push origin v0.11.0
-git push gitea v0.11.0
+git tag -a v0.6.0 -m "Release v0.6.0"
+git push origin v0.6.0
+git push backup v0.6.0
 ```
 
 ### .gitignore — Ignoring Files
@@ -387,7 +442,7 @@ __pycache__/        # Python cache
 *.pyc               # Python compiled files
 tempCodeRunnerFile.py
 .vscode/            # VSCode settings (optional — omit if you want to track)
-*.png               # generated plot images (optional)
+*.png               # generated images (optional)
 ```
 
 ```bash
@@ -403,7 +458,7 @@ git check-ignore -v file.cpp  # check WHY a file is ignored
 
 ```bash
 git stash                     # save all uncommitted changes
-git stash save "work in progress on scatter"  # save with a description
+git stash save "work in progress on feature A"  # save with a description
 git stash list                # see all stashes
 git stash pop                 # restore most recent stash and delete it
 git stash apply               # restore most recent stash but keep it in list
@@ -414,12 +469,12 @@ git stash clear               # delete ALL stashes
 
 **When to use:**
 ```bash
-# you're working on fill_between but need to quickly fix a bug in plot
-git stash                     # save fill_between work
-# fix the plot bug
+# you're working on feature A but need to quickly fix a bug elsewhere
+git stash                     # save feature A work
+# fix the bug
 git add -A
-git commit -m "fix: plot bug"
-git stash pop                 # restore fill_between work
+git commit -m "fix: bug in parser"
+git stash pop                 # restore feature A work
 ```
 
 ---
@@ -436,8 +491,8 @@ git blame --since=2.weeks file.cpp  # show changes in last 2 weeks
 
 Output looks like:
 ```
-a1b2c3 (Apisteftos 2026-07-05 14:23:11) void plotImpl(...) {
-d4e5f6 (Apisteftos 2026-07-06 09:15:42)     PyPtr args(PyTuple_New(2));
+a1b2c3 (Alice 2026-07-05 14:23:11) void parseInput(...) {
+d4e5f6 (Bob   2026-07-06 09:15:42)     Buffer buf(256);
 ```
 
 Useful for debugging — find when a bug was introduced and who introduced it.
@@ -487,7 +542,7 @@ git rebase -i HEAD~3          # rewrite last 3 commits
 
 Opens editor:
 ```
-pick a1b2c3 feat: add scatter
+pick a1b2c3 feat: add search
 pick d4e5f6 fix: typo
 pick g7h8i9 fix: another typo
 
@@ -500,7 +555,7 @@ pick g7h8i9 fix: another typo
 
 Change to:
 ```
-pick a1b2c3 feat: add scatter
+pick a1b2c3 feat: add search
 squash d4e5f6 fix: typo
 squash g7h8i9 fix: another typo
 ```
@@ -533,15 +588,15 @@ Merge conflicts happen when two branches change the same line differently.
 
 ```bash
 git merge feature             # merge feature into current branch
-# CONFLICT: Merge conflict in include/Axes.h
+# CONFLICT: Merge conflict in include/widget.h
 ```
 
 **Git marks the conflict in the file:**
 ```cpp
 <<<<<<< HEAD
-void plot(const PlotConfig& config) {   // your version
+void draw(const Config& config) {      // your version
 =======
-void plot(PlotConfig config) {          // incoming version
+void draw(Config config) {               // incoming version
 >>>>>>> feature
 ```
 
@@ -552,8 +607,8 @@ void plot(PlotConfig config) {          // incoming version
 4. Save the file
 
 ```bash
-git add include/Axes.h        # mark as resolved
-git commit -m "merge: resolve conflict in Axes.h"
+git add include/widget.h        # mark as resolved
+git commit -m "merge: resolve conflict in widget.h"
 ```
 
 **Useful tools:**
@@ -572,7 +627,7 @@ SSH keys let you push/pull without typing your password every time.
 
 **Generate SSH key:**
 ```bash
-ssh-keygen -t ed25519 -C "kosagglis@gmail.com"
+ssh-keygen -t ed25519 -C "you@example.com"
 # press Enter for default location (~/.ssh/id_ed25519)
 # optionally set a passphrase
 ```
@@ -591,18 +646,18 @@ GitHub → Settings → SSH and GPG keys → New SSH key → paste key → Save
 **Test connection:**
 ```bash
 ssh -T git@github.com
-# Hi Apisteftos! You've successfully authenticated.
+# Hi <username>! You've successfully authenticated.
 ```
 
-**Add to Gitea (your NAS):**
+**Add to a self-hosted Git server (e.g. Gitea):**
 ```
-Gitea → Settings → SSH Keys → Add Key → paste key → Save
+Server → Settings → SSH Keys → Add Key → paste key → Save
 ```
 
 **Switch existing repo from HTTPS to SSH:**
 ```bash
-git remote set-url origin git@github.com:Apisteftos/matplotlib-modern-cpp.git
-git remote set-url gitea git@your-nas:Apisteftos/matplotlib-modern-cpp.git
+git remote set-url origin git@github.com:<username>/<repo>.git
+git remote set-url backup git@your-server:<username>/<repo>.git
 ```
 
 ---
@@ -621,7 +676,7 @@ git cherry-pick --abort       # abort if conflicts
 
 **When to use:**
 ```bash
-# you fixed a bug on feature branch
+# you fixed a bug on a feature branch
 # you want that fix on main too without merging everything
 git checkout main
 git cherry-pick a1b2c3        # apply only the bug fix commit
@@ -640,6 +695,16 @@ git cherry-pick a1b2c3        # apply only the bug fix commit
 | `docs:` | documentation only |
 | `refactor:` | code restructured, no feature/fix |
 | `chore:` | maintenance, cleanup |
-| `v0.10.0:` | version bump commit |
+| `v0.5.0:` | version bump commit |
 
 ---
+
+---
+
+## Versioning
+
+How to number releases (Semantic Versioning), what goes into a release and how to write a changelog: see [VERSIONING.md](VERSIONING.md).
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
